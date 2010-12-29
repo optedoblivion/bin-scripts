@@ -1,0 +1,28 @@
+#!/bin/bash
+
+
+if [ $# -ne 1 ]; then
+    echo
+    echo "Usage: $0 <src_directory>"
+    echo
+    exit 1
+fi
+
+src_dir="$1"
+
+num_blocks=$(du -sk $1 | tail -n1 | awk '{print $1;}')
+
+if [ $num_blocks -lt 20480 ]; then 
+    extra_blocks=3072
+else 
+    extra_blocks=20480
+fi
+
+num_blocks=$(expr $num_blocks + $extra_blocks)
+
+num_inodes=$(find $1|wc -l)
+
+num_inodes=$(expr $num_inodes + 500)
+
+echo "Blocks: $num_blocks"
+echo "Inodes: $num_inodes"

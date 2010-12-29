@@ -1,0 +1,14 @@
+#!/bin/bash
+
+fixnames
+
+songs=`ls *.{mp3,ogg,flac,m4a}`
+loc=$(echo `pwd`|sed "s/\/home\/mpd\/Music\///g")
+PLAYLIST="`echo $loc|sed 's/\//\-/'`.m3u"
+echo $PLAYLIST
+
+for song in $songs; 
+	do 
+		echo "$loc/$song" >> $PLAYLIST
+	done
+sudo cp $PLAYLIST /var/lib/mpd/playlists/

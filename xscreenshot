@@ -1,0 +1,20 @@
+mkdir -p /tmp/screenshots
+cd /tmp/screenshots || exit 1
+
+if [ ! -e n ]; then
+    echo 0 > n
+fi
+
+if [ $# -eq 4 ]; then
+    X=$1
+    Y=$2
+    WIDTH=$3
+    HEIGHT=$4
+    N=$[$(<n)+1]
+    import -window root -crop ${WIDTH}x$HEIGHT+$X+$Y ss$(printf %02d $N).png
+    echo $N > n
+else
+    echo
+    echo "Usage $0 <x> <y> <widthpx> <heightpx>"
+    echo
+fi

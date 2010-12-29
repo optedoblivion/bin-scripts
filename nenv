@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+	echo
+	echo "Usage: nenv <name>"
+	echo
+	exit 1
+fi
+
+ADIR=`ls $HOME/.virtualenvs/|grep "$1"`
+if [ "$ADIR" != "" ]; then
+	echo "$1 already exists!"
+else
+	mkdir -p $HOME/.virtualenvs
+	cd $HOME/.virtualenvs
+	virtualenv "$1"
+fi

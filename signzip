@@ -1,0 +1,3 @@
+#!/bin/bash
+java -jar ~/.bin/SignApk/signapk.jar ~/.bin/SignApk/testkey.x509.pem ~/.bin/SignApk/testkey.pk8 $1 `basename $1 .zip`-signed.zip  
+java -Xmx512m -jar ~/.bin/SignApk/signapk.jar

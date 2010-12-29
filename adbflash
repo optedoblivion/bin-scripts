@@ -1,0 +1,41 @@
+#!/bin/bash
+echo
+echo "---[ ADB Flash ]--- "
+
+if [ $# -ne 1 ]; then
+    echo
+    echo "Usage: $0 <update.zip>"
+    echo
+    exit 1
+fi
+
+
+echo "] Checking for adb..."
+ADB="$(which adb)"
+
+if [ "$ADB" == "" ]; then
+    echo
+    echo "You must have adb in your path!"
+    echo
+    exit 1
+fi
+
+echo "] Checking '$1'..."
+FILE="$(ls $1)"
+
+if [ "$FILE" == "" ]; then
+    echo
+    echo "File '$1' does not exist!"
+    echo
+    exit 1
+fi
+
+echo "] Pushin $1 to SDCARD..."
+adb push $FILE /sdcard/
+echo "] Pointing recovery to package..."
+adb shell " echo '--update_package=SDCARD:$1' > /cache/recovery/command "
+echo "] Rebooting into recovery..."
+adb reboot recovery &
+echo "] Done."
+
+

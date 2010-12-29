@@ -1,0 +1,4 @@
+#!/bin/bash
+
+flac -d -o - "$1" | lame -b 320 -h - > "$2".mp3
+

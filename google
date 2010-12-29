@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 <query>"
+    exit
+fi
+
+links "http://www.google.com/search?q=$1"

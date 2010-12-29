@@ -1,0 +1,17 @@
+#!/bin/bash
+
+FIXDIR=`pwd`
+
+files=`ls $FIXDIR|sed s/\ /_SPACE_/g`
+for file in $files;
+do
+	## Fix only file names with spaces!
+	hasspace=`echo $file|grep "_SPACE_"`
+	if [ "$hasspace" != "" ]; then
+		realname=`echo $file|sed s/_SPACE_/\ /g`
+		newname=`echo $file|sed s/_SPACE_/\./g`
+		echo "$realname -> $newname"
+		mv "$realname" "$newname"
+	fi
+done
+

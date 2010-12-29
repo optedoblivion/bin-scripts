@@ -1,0 +1,153 @@
+#!/usr/bin/python
+
+
+      ###############
+     ##  todoList  ##
+     ###############################
+    #                               #
+    #  This is a simple todo list.  #
+    #  --Martin Brabham             #
+    #                               #
+     ###############################
+
+
+import os,sys,traceback
+
+class TODO:
+
+    HELP = {}
+    HELP["append"] = """
+    \tAppend - appends to list.\n\t\ttodo [-a][--append] 
+    """
+    HELP["help"] = "\tHelp - This Menu."
+
+    TODOFILE = ".todo"
+
+    def __init__(self):
+        os.system("echo $HOME > /tmp/.home_path")
+        file = open("/tmp/.home_path", "rb")
+        PATH = file.read()
+        PATH = PATH.rstrip("\n")
+        file.close()
+        if not os.path.exists("%s/self.TODOFILE"%PATH):
+            os.system("touch %s/self.TODOFILE"%PATH)
+
+    def getList(self):
+        os.system("echo $HOME > /tmp/.home_path")
+        file = open("/tmp/.home_path", "rb")
+        PATH = file.read()
+        PATH = PATH.rstrip("\n")
+        file.close()
+        os.system("rm /tmp/.home_path")
+        file = open("%s/self.TODOFILE"%PATH, "rb")
+        DATA = file.read()
+        file.close()
+        return DATA
+    
+    def clearList(self):
+        os.system("echo $HOME > /tmp/.home_path")
+        file = open("/tmp/.home_path", "rb")
+        PATH = file.read()
+        PATH = PATH.rstrip("\n")
+        file.close()
+        os.system("rm /tmp/.home_path")
+        os.system("rm %s/self.TODOFILE"%PATH)
+        os.system("touch %s/self.TODOFILE"%PATH)
+    
+    def appendList(self, item):
+        DATA = self.getList()
+        LINES = DATA.split("\n")
+        self.clearList()
+        count = 0
+        os.system("echo $HOME > /tmp/.home_path")
+        file = open("/tmp/.home_path", "rb")
+        PATH = file.read()
+        PATH = PATH.rstrip("\n")
+        file.close()
+        os.system("rm /tmp/.home_path")
+        file = open("%s/self.TODOFILE"%PATH, "ab")
+        for LINE in LINES:
+            file.write("%s\n"%LINE)
+            if LINE.split(".")[0] == '':
+                count = 0
+            else:
+                count = int(LINE.split(".")[0])
+        count += 1
+
+        file.write("\t%d. %s" % (count, item))
+        file.close()
+    
+    def showList(self):
+        return self.getList()
+
+    def add(self, item):
+        self.appendList(item)
+
+    def delItem(self, id):
+        if type(id) != type(1):
+            print "You must enter the task number!"
+            sys.exit(1)
+        DATA = self.getList()
+        LINES = DATA.split("\n")
+        self.clearList()
+        for LINE in LINES:
+            if LINE.split(".")[0] != "":
+                TMP = ""
+                tFlag = 0
+                for L in LINE.split("."):
+                    if tFlag == 0:
+                        tFlag = 1
+                        continue
+                    else:
+                        TMP += L
+                if int(LINE.split(".")[0]) != int(id):
+                    self.appendList(TMP)
+
+    def help(self, command=None):
+        if command:
+            print "%s\t-\t%s" % (command, self.HELP[command])
+        else:
+            for k,v in self.HELP.items():
+                print "%s\t-\t%s" % (k, self.HELP[k])
+
+    def display(self, msg):
+
+        print """
+         |            |      |   _)     |  
+          _|  _ \  _` |  _ \ |    |(_-<  _|
+        \__|\___/\__,_|\___/____|_|___/\__|
+        """
+        print msg
+        print ""
+
+if __name__=="__main__":
+    aTODO = TODO()
+    if len(sys.argv) == 1:
+        aTODO.display(aTODO.showList())
+    elif len(sys.argv) == 2:
+        if sys.argv[1] == "-c":
+            print "Configuration"
+        elif sys.argv[1] == "--clear":
+            aTODO.clearList()
+        else:
+            print "Usage:%s -[c]" % sys.argv[0]
+            sys.exit(1)
+
+    elif len(sys.argv) == 3:
+        if sys.argv[1] == "-a":
+            item = sys.argv[2]
+            aTODO.add(item)
+        elif sys.argv[1] == "-d":
+            try:
+                id = int(sys.argv[2])
+            except:
+                print "You must enter the task number!"
+                sys.exit(1)
+            aTODO.delItem(id)
+        else:
+            print "Usage:%s -[c]" % sys.argv[0]
+            sys.exit(1)
+
+    else:
+        print "Usage:%s -[c]" % sys.argv[0]
+        sys.exit(1)

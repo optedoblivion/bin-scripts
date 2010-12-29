@@ -1,0 +1,4 @@
+mkdir -p $HOME/.sandbox
+cd $HOME/.sandbox
+/bin/bash --init-file $HOME/.sandbox/.bashrc
+

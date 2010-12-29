@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# USAGE: ./recordavi <output file> [WIDTH] [HEIGHT]
+
+if [ $# -lt 1 ]; then
+	echo
+	echo "] Usage $0 <output file> [WIDTH] [HEIGHT]"
+	echo
+	exit
+fi
+
+OUTPUT=$1
+WIDTH=$2
+HEIGHT=$3
+
+if [ $# -lt 3 ]; then
+	echo "] Going with default width and height..."
+	echo "] Usage: $0 <output file> [WIDTH] [HEIGHT]"
+	WIDTH=768
+	HEIGHT=576
+fi
+
+OUTPUT="$OUTPUT.avi"
+
+mencoder -tv driver=v4l2:width=$WIDTH:height=$HEIGHT -oac mp3lame -lameopts cbr:br=64 -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=900 -vf crop=720:544:24:16,pp=lb -o $OUTPUT tv://

@@ -1,0 +1,57 @@
+#!/bin/bash
+
+echo "---[ G2 Serial ]---"
+
+USER="$(whoami)"
+
+if [ "$USER" != "root" ]; then
+    echo
+    echo "] This should be ran as root!"
+    echo
+    exit 1
+fi
+
+ls /dev/ttyUSB* > /tmp/usb1
+SCREEN="$(which screen)"
+USBDEV="$(lsusb|grep 'High Tech Computer'|awk '{ print $6 }')"
+VENDOR="$(echo $USBDEV | cut -d ':' -f 1)"
+PRODUCT="$(echo $USBDEV | cut -d ':' -f 2)"
+
+if [ "$SCREEN" == "" ]; then 
+    echo
+    echo "] You must install 'screen'"
+    echo
+    exit 1
+fi
+
+if [ "$USBDEV" == "" ]; then
+    echo
+    echo "] HTC Device not found!"
+    echo
+    exit 1
+fi
+
+echo "] Connecting to Vendor: $VENDOR Product: $PRODUCT"
+
+modprobe usbserial vendor=0x$VENDOR product=0x$PRODUCT
+
+## Let module load
+sleep 2
+
+ls /dev/ttyUSB* > /tmp/usb2
+
+TTY=$(diff /tmp/usb1 /tmp/usb2 | grep '>' | awk '{ print $2 }')
+
+if [ "$TTY" == "" ]; then
+    echo
+    echo "] Failed to get TTY!"
+    echo
+    exit 1
+fi
+
+screen $TTY 115200 8N1
+
+echo "] Removing usbserial module."
+modprobe -r usbserial
+
+

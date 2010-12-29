@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 <flv>"
+    exit 1
+fi
+
+FLV="$1"
+MP3="$1.mp3"
+ffmpeg -i "./$FLV" -f mp3 "./$MP3"
+

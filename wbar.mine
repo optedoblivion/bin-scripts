@@ -1,0 +1,3 @@
+#!/bin/bash
+wbar -isize 32 -zoomf 2.5 -jumpf 1.0 -bpress -nofont balfa 100 -falfa 0 -filter 2 -fc 0x99999999 -above-desk
+

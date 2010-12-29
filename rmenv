@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+	echo
+	echo "Usage: rmenv <name>"
+	echo
+	exit 1
+fi
+
+RMDIR=`ls $HOME/.virtualenvs/|grep "$1"`
+if [ "$RMDIR" != "" ]; then
+	rm -rf $HOME/.virtualenvs/"$1"
+	echo "$1 removed!"
+else
+	echo "$1 does not exist!"
+fi

@@ -1,0 +1,22 @@
+#!/bin/bash
+
+PID=`pgrep dhcpcd`
+if [ "$PID" != "" ]; then
+    echo "Shutting down dhcpcd..."
+    dhcpcd eth0 --release
+    sleep 1
+fi
+echo "Bringing interface down..."
+sudo ifconfig eth0 down 
+sleep 1
+echo "Setting interface mode to Ad-Hoc..."
+sudo iwconfig eth0 mode ad-hoc 
+sleep 1
+echo "Bringing interface up..."
+sudo ifconfig eth0 up 
+sleep 1
+echo "Setting ESSID to 'AndroidTether'..."
+sudo iwconfig eth0 essid "AndroidTether" 
+sleep 1
+echo "Attempting to connect..."
+sudo dhcpcd eth0

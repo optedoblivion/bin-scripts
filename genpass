@@ -1,0 +1,10 @@
+#!/bin/bash
+
+LENGTH=10
+if [ $# -eq 1 ]; then
+    LENGTH="$1"
+fi
+echo
+< /dev/urandom tr -dc "\!@#$%^&*()A-Za-z0-9_/\\\\;:.?[]{}_+" | head -c$LENGTH
+echo
+echo

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+	echo
+	echo "Usage: swenv <name>"
+	echo
+	exit 1
+fi
+
+ADIR=`ls $HOME/.virtualenvs/|grep "$1"`
+if [ "$ADIR" != "" ]; then
+	source "$HOME/.virtualenvs/$1/bin/activate"
+else
+	echo "$1 doesn't exist!"
+fi

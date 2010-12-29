@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [ $# -eq 2 ]; then
+    MDIR="$1"
+    for song in `ls "$MDIR"`;
+    do
+        echo '$MDIR/$song' >> "$song.m3u"
+    done
+    exit 0
+fi
+
+echo
+echo "Usage: $0 </path/to/music> </path/to/plist>"
+echo
