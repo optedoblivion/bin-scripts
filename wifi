@@ -1,19 +1,53 @@
 #!/bin/bash
 
 if [ $# -lt 2 ]; then
-    echo "Usage: $0 <interface> <essid> [wpa_password]"
-    exit
+    echo
+    echo "Usage: $0 <interface> <essid> [wpa|wep] [key]"
+    echo
+    exit 1
 fi
 
-ESSID="$1"
-PASSWORD="$2"
-INTERFACE="$3"
+USER="$(whoami)"
 
-sudo kill -9 `pgrep dhcpcd`
-sudo kill -9 `pgrep wpa_supplicant`
+if [ "$USER" != "root" ]; then
+    HAS_SUDO="$(which sudo)"
+    if [ "$HAS_SUDO" != "" ]; then
+        echo "Please enter sudo password..."
+        sudo echo
+    else
+        echo
+        echo "You must run this script as root or install sudo!"
+        echo
+        exit 1
+    fi
+fi
 
-sudo iwconfig "$INTERFACE" essid "$ESSID"
-sudo wpa_passphrase "$ESSID" "$PASSWORD" > "/tmp/$ESSID.conf"
-sudo wpa_supplicant -B -Dwext -i "$INERFACE" -c "/tmp/$ESSID.conf"
-sleep 3
-sudo dhcpcd eth0
+IFACE="$1"
+ESSID="$2"
+PID=$(ps ax | grep "dhcpcd $IFACE" | grep -v grep | awk '{ print $1 }')
+ENC_TYPE="$3"
+ENC_KEY="$4"
+
+if [ "$PID" != "" ]; then
+    sudo dhcpcd -k "$IFACE"
+    sleep 1
+fi
+
+if [ "$ENC_TYPE" == "wep" ]; then
+    sudo iwconfig "$IFACE" essid "$ESSID" key "$ENC_KEY"
+fi
+
+if [ "$ENC_TYPE" == "wpa" ]; then
+    sudo iwconfig "$IFACE" essid "$ESSID"
+    WPID=$(pgrep wpa_supplicant)
+    if [ "$WPID" != "" ]; then
+        sudo kill -9 $WPID
+    fi
+    WPA_CONF="/tmp/wpa-$(echo $RANDOM)"
+    wpa_passphrase "$ESSID" "$ENC_KEY" > $WPA_CONF
+    sudo wpa_supplicant -B -Dwext -i $IFACE -c $WPA_CONF
+    sleep 3
+fi
+
+sudo dhcpcd $IFACE
+

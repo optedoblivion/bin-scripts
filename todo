@@ -29,8 +29,8 @@ class TODO:
         PATH = file.read()
         PATH = PATH.rstrip("\n")
         file.close()
-        if not os.path.exists("%s/self.TODOFILE"%PATH):
-            os.system("touch %s/self.TODOFILE"%PATH)
+        if not os.path.exists("%s/%s"%(PATH,self.TODOFILE)):
+            os.system("touch %s/%s"%(PATH,self.TODOFILE))
 
     def getList(self):
         os.system("echo $HOME > /tmp/.home_path")
@@ -39,7 +39,7 @@ class TODO:
         PATH = PATH.rstrip("\n")
         file.close()
         os.system("rm /tmp/.home_path")
-        file = open("%s/self.TODOFILE"%PATH, "rb")
+        file = open("%s/%s"%(PATH,self.TODOFILE), "rb")
         DATA = file.read()
         file.close()
         return DATA
@@ -51,8 +51,8 @@ class TODO:
         PATH = PATH.rstrip("\n")
         file.close()
         os.system("rm /tmp/.home_path")
-        os.system("rm %s/self.TODOFILE"%PATH)
-        os.system("touch %s/self.TODOFILE"%PATH)
+        os.system("rm %s/%s"%(PATH,self.TODOFILE))
+        os.system("touch %s/%s"%(PATH,self.TODOFILE))
     
     def appendList(self, item):
         DATA = self.getList()
@@ -65,7 +65,7 @@ class TODO:
         PATH = PATH.rstrip("\n")
         file.close()
         os.system("rm /tmp/.home_path")
-        file = open("%s/self.TODOFILE"%PATH, "ab")
+        file = open("%s/%s"%(PATH,self.TODOFILE), "ab")
         for LINE in LINES:
             file.write("%s\n"%LINE)
             if LINE.split(".")[0] == '':
