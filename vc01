@@ -1,2 +1,0 @@
-#!/bin/bash
-rdesktop vc01 -g 1275x780
