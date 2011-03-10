@@ -1,17 +1,33 @@
 #!/bin/bash
 
-if [ $# -ne 1 ]; then
+REQUIRED="python virtualenv"
+
+for name in $(echo $REQUIRED);
+do
+    type -P "$name" &>/dev/null || { echo "Install '$name'" >&2; exit 1;}
+done
+
+if [ $# -lt 1 ]; then
 	echo
-	echo "Usage: nenv <name>"
+	echo "Usage: nenv <name> [python_bin]"
 	echo
 	exit 1
 fi
 
-ADIR=`ls $HOME/.virtualenvs/|grep "$1"`
-if [ "$ADIR" != "" ]; then
-	echo "$1 already exists!"
+ENV_DIR="$HOME/.virtualenvs/"
+
+mkdir -p "$ENV_DIR"
+
+MY_ENV=$(ls "$ENV_DIR"|grep ^"$1"$)
+
+if [ "$MY_ENV" != "" ]; then
+    echo "$1 already exists!"
 else
-	mkdir -p $HOME/.virtualenvs
-	cd $HOME/.virtualenvs
-	virtualenv "$1"
+    cd "$ENV_DIR"
+    PYTHON_BIN="--python=$(type -P python)"
+    if [ "$2" != "" ]; then
+        PYTHON_BIN="--python=$2"
+    fi
+    virtualenv "$PYTHON_BIN" "$1"
+    virtualenv --relocatable "$1"
 fi
