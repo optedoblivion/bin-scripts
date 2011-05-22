@@ -33,12 +33,13 @@ if [ "$PID" != "" ]; then
     sleep 1
 fi
 
+sudo iwconfig "$IFACE" essid "$ESSID"
+
 if [ "$ENC_TYPE" == "wep" ]; then
     sudo iwconfig "$IFACE" essid "$ESSID" key "$ENC_KEY"
 fi
 
 if [ "$ENC_TYPE" == "wpa" ]; then
-    sudo iwconfig "$IFACE" essid "$ESSID"
     WPID=$(pgrep wpa_supplicant)
     if [ "$WPID" != "" ]; then
         sudo kill -9 $WPID

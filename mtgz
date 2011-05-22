@@ -1,0 +1,31 @@
+#!/bin/bash
+# tar/gzip with progress indication
+# Outputs data that can be piped
+
+REQUIRED="pv dialog"
+
+for name in $(echo $REQUIRED);
+do
+    type -P "$name" &>/dev/null || { echo "Install '$name'" >&2; exit 1;}
+done
+
+OUTEXT=".tgz"
+
+if [ $# -lt 1 ]; then
+    echo
+    echo "Usage: $0 <input-folder> [output-name]"
+    echo
+    exit 1
+fi
+
+INPUT="$(echo ${1%\/})"
+OUTPUT="$INPUT$OUTEXT"
+if [ "$2" != "" ]; then
+    OUTPUT="$2$OUTEXT"
+fi
+
+(tar cf - "$INPUT" | pv -n -s $(du -sb "$INPUT" | awk '{print $1}') | gzip -9 > "$OUTPUT") 2>&1 | dialog --gauge "Progress" 7 70
+
+clear
+
+ls -l $OUTPUT

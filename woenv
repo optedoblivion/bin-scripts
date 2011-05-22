@@ -1,0 +1,27 @@
+#!/bin/bash
+
+REQUIRED="python virtualenv"
+
+for name in $(echo $REQUIRED);
+do
+    type -P "$name" &>/dev/null || { echo "Install '$name'" >&2; exit 1;}
+done
+
+if [ $# -lt 1 ]; then
+	echo
+	echo "Usage: nenv <name> [python_bin]"
+	echo
+	exit 1
+fi
+
+ENV_DIR="$HOME/.virtualenvs/"
+
+mkdir -p "$ENV_DIR"
+
+MY_ENV=$(ls "$ENV_DIR"|grep ^"$1"$)
+
+if [ "$MY_ENV" == "" ]; then
+    echo "$1 doesn't exists!"
+else
+    $SHELL --init-file "$ENV_DIR/$1/bin/activate"
+fi
