@@ -9,7 +9,7 @@ fi
 
 ADIR=`ls $HOME/.virtualenvs/|grep "$1"`
 if [ "$ADIR" != "" ]; then
-	source "$HOME/.virtualenvs/$1/bin/activate"
+	bash --init-file "$HOME/.virtualenvs/$1/bin/activate"
 else
 	echo "$1 doesn't exist!"
 fi
