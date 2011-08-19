@@ -1,0 +1,61 @@
+#!/bin/bash
+
+REQUIRED="locate"
+
+for req in $(echo $REQUIRED);
+do
+    type -P "$req" &>/dev/null || { echo "Install '$req'" >&2; exit 1; }
+done
+
+if [ $# -lt 1 ]; then
+
+    echo
+    echo "Usage: $0 <board name> [--sync]"
+    echo
+    exit 1
+
+fi
+
+# e.g. I need to execut 'swenv buildbot' in order to source the correct
+# python deps for repo and building
+#
+# TODO: FIX ME
+# PRE_BUILD_CMD="swenv buildbot"
+
+ENVSH="build/envsetup.sh"
+CM_ROOT=$(locate $ENVSH)
+CM_ROOT=$(echo $CM_ROOT|sed "s/build\/envsetup.sh//g")
+BOARD_NAME="$1"
+DROPBOX="~/Dropbox"
+
+for root in $(echo $CM_ROOT);
+do
+#    echo $root
+done
+
+zenity --list --title="Select CyanogenMod Root Path" --column="CyanogenMod Path" $(echo $CM_ROOT | xargs)
+exit 1
+cd $CM_ROOT
+
+# TODO: FIXME
+#$(echo $PRE_BUILD_CMD)
+source ./build/envsetup.sh
+
+# Iterate through options
+let i=0 
+for option in "$@"
+do
+    if [ $i -lt 1 ];then
+        # use this to skip board name
+        let i+=1
+    else
+        opt=$(echo "$option" | grep -e "^-")
+        if [ "$opt" == "--sync" ]; then
+            reposync
+        fi  
+    fi  
+
+done
+
+CYANOGEN_NIGHTLY=1 brunch "$BOARD_NAME"
+cp $OUT/update-squished.zip "$DROPBOX"
