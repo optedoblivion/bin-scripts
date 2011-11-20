@@ -1,0 +1,8 @@
+#!/bin/bash
+
+## Invert the mouse to natural scrolling
+## like OSX Lion
+
+xinput set-button-map 13 1 2 3 5 4 6 7 8 9 10 11 12
+
+
