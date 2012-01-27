@@ -1,51 +1,67 @@
 #!/bin/bash
 
-PROJECT_FOLDER="project_$(date '+%s')"
-AUTH_FILE=".authors.txt"
-
-if [ $# -lt 1 ]; then
+# Check args
+if [ $# -lt 2 ]; then
     echo
-    echo "Usage: $0 <svn-url> [Project Name]"
+    echo "Usage: $0 <svn-url> <Project Name> [authors.txt]"
     echo
     exit 1
 fi
 
-if [ "$2" != "" ]; then
-    PROJECT_FOLDER="$2"
+# Define vars
+SVN_URL="$1"
+PROJECT_FOLDER="$2"
+AUTH_FILE=".authors.txt"
+
+# Make folder
+mkdir -p "./$PROJECT_FOLDER"
+
+# Check for authors.txt passed in
+if [ $# -gt 2 ]; then
+    AUTH_ARG="$3"
+    cp "$AUTH_ARG" "./$PROJECT_FOLDER/$AUTH_FILE"
 fi
 
-SVN_URL="$1"
-
-mkdir -p "./$PROJECT_FOLDER"
+# Go to directory
 cd "$PROJECT_FOLDER"
+
+# Init repo
 git svn init "$SVN_URL"
 if [ $? -ne 0 ]; then
     echo "Error: $?"
     exit $?
 fi
 
+# Check if we have an authors.txt
 AUTHORS="$(find . -name $AUTH_FILE)"
 
+# If we don't, make one
 if [ "$AUTHORS" == "" ]; then
-    echo "herp = Herp Derp <herp@derp.com>" > $AUTH_FILE
-    $($EDITOR $AUTH_FILE)
+    touch "$AUTH_FILE"
+    echo "# Example: (Please remove these comments)" > $AUTH_FILE
+    echo "# herp = Herp Derp <herp@derp.com>" >> $AUTH_FILE
+    $EDITOR $AUTH_FILE
 fi
 
+# Config
 git config svn.authorsfile $AUTH_FILE
 if [ $? -ne 0 ]; then
     echo "Error: $?"
     exit $?
 fi
 
+# Fetch contents
 git svn fetch --authors-file $AUTH_FILE
 if [ $? -ne 0 ]; then
     echo "Error: $?"
     exit $?
 fi
 
+# Setup gitignore
 touch .gitignore
 echo "bin/" >> .gitignore
 echo "gen/" >> .gitignore
 echo ".gitignore" >> .gitignore
+# Need to keep authors around or next git svn fetch will fail!
 echo ".authors.txt" >> .gitignore
 
