@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# this was for my mac, didn't feel like installing macports at the time
+
+PID=$(ps ax|grep $1|grep -v grep)
+echo $PID

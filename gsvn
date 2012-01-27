@@ -1,0 +1,51 @@
+#!/bin/bash
+
+PROJECT_FOLDER="project_$(date '+%s')"
+AUTH_FILE=".authors.txt"
+
+if [ $# -lt 1 ]; then
+    echo
+    echo "Usage: $0 <svn-url> [Project Name]"
+    echo
+    exit 1
+fi
+
+if [ "$2" != "" ]; then
+    PROJECT_FOLDER="$2"
+fi
+
+SVN_URL="$1"
+
+mkdir -p "./$PROJECT_FOLDER"
+cd "$PROJECT_FOLDER"
+git svn init "$SVN_URL"
+if [ $? -ne 0 ]; then
+    echo "Error: $?"
+    exit $?
+fi
+
+AUTHORS="$(find . -name $AUTH_FILE)"
+
+if [ "$AUTHORS" == "" ]; then
+    echo "herp = Herp Derp <herp@derp.com>" > $AUTH_FILE
+    $($EDITOR $AUTH_FILE)
+fi
+
+git config svn.authorsfile $AUTH_FILE
+if [ $? -ne 0 ]; then
+    echo "Error: $?"
+    exit $?
+fi
+
+git svn fetch --authors-file $AUTH_FILE
+if [ $? -ne 0 ]; then
+    echo "Error: $?"
+    exit $?
+fi
+
+touch .gitignore
+echo "bin/" >> .gitignore
+echo "gen/" >> .gitignore
+echo ".gitignore" >> .gitignore
+echo ".authors.txt" >> .gitignore
+

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+PACKAGE="com.nom"
+
+if [ $# -eq 2 ];then
+    PACKAGE="$2"
+fi
+
+ITEMS=$(adb shell pm list packages | grep $PACKAGE | cut -d ':' -f 2 | tr -d "\r" | xargs)
+
+echo "Wiping device of Nom applications"
+for ITEM in $(echo $ITEMS)
+do
+    echo "Removing $ITEM..."
+    adb uninstall $ITEM
+done
+echo "Done."

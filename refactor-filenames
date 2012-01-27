@@ -1,0 +1,22 @@
+#!/bin/bash
+
+if [ $# -ne 2 ]; then
+    echo "Usage: <old filename> <new filename>"
+    exit 1
+fi
+
+NAME="$1"
+NEWNAME="$2"
+SRCHNAME="$NAME*"
+
+echo "]> Refactoring $NAME to $NEWNAME in all subdirectories..."
+
+find . -type f \( -iname "$SRCHNAME" ! -iname ".*" \)| while read file;
+do
+    TMPOLD=$file
+    TMPNEW=$(echo $file| sed s/$NAME/$NEWNAME/g)
+    echo "]> $TMPOLD -> $TMPNEW"
+    mv $TMPOLD $TMPNEW
+done
+
+echo "]> Done."

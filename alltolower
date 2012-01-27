@@ -1,0 +1,9 @@
+#!/usr/bin/env python
+
+import os
+
+files = os.walk(".")
+
+for file in files.next()[2]:
+    cmd = "mv \"%s\" \"%s\"" % (file, file.lower())
+    os.system(cmd)

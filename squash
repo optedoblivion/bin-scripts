@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+    echo
+    echo "Usage: $0 <commit count>"
+    echo
+    exit 1
+fi
+
+function isInt() {
+    printf "%d" $1 > /dev/null 2>&1
+    return $?
+}
+
+if isInt $1; then
+    git rebase -i HEAD~$1
+else 
+    echo "Argument '$1' must be an integer!"
+    exit 1
+fi
+
