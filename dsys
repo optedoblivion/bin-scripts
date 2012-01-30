@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then 
+    echo
+    echo "Usage: $0 <package name>"
+    echo
+    exit 1
+fi
+
+adb shell dumpsys meminfo "$1"
