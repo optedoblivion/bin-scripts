@@ -1,0 +1,52 @@
+#!/usr/bin/env python
+
+import os
+import re
+import sys
+
+ARG_COUNT = 2
+
+if __name__=="__main__":
+    argc = len(sys.argv)
+    argv = sys.argv
+    if argc != ARG_COUNT:
+        print("")
+        print("This script will generate other dimentions for other")
+        print("screen sizes.  Pass an xlarge valued dimen.xml into")
+        print("this script")
+        print("")
+        print("Usage: %s <dimen.xml>" % (argv[0]))
+        print("")
+        sys.exit(1)
+
+    filename = argv[1]
+    try:
+        dimen_file = open(filename, "rb")
+    except Exception, e:
+        print("Error: %s" % e)
+        sys.exit(1)
+    data = dimen_file.read()
+    dimen_file.close()
+
+    pattern = re.compile(">(\d+)dp?<", re.I + re.M)
+    xlargedps = re.findall(pattern, data)
+
+    reg_file = open("reg-dimen.xml", "wb")
+    lar_file = open("lar-dimen.xml", "wb")
+    for line in data.split("\n"):
+        match = re.findall(pattern, line)
+        if len(match) > 0:
+            xdp = int(match[0])
+            rdp = (xdp/3) * 2
+            newline = re.sub(str(xdp), str(rdp), line)
+            reg_file.write(newline)
+            ldp = (xdp/6) * 5
+            newline = re.sub(str(xdp), str(ldp), line)
+            lar_file.write(newline)
+        else:
+            reg_file.write(line)
+            lar_file.write(line)
+        reg_file.write("\n")
+        lar_file.write("\n")
+    reg_file.close()
+    lar_file.close()
