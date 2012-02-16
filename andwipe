@@ -1,0 +1,67 @@
+#!/bin/bash
+
+if [ $# -lt 1 ]; then
+    echo
+    echo "Wipes data for all applications containing given package name."
+    echo "    Options:"
+    echo "         -r    Remove the applications instead of just wiping them."
+    echo
+    echo "Usage: $0 <package name> [-r]"
+    echo
+    exit 1
+fi
+
+PACKAGE="$1"
+REMOVEFLAG="$2"
+
+function handleAction() {
+    if [ "$REMOVEFLAG" == "-r" ]; then
+        wipeApp $1 $2
+    else
+        wipeData $1 $2
+    fi
+    return $?
+}
+
+function getActionText() {
+    if [ "$REMOVEFLAG" == "-r" ]; then
+        echo "Removing"
+    else
+        echo "Wiping"
+    fi
+}
+
+function wipeData() {
+    DEVICE="$1"
+    ITEM="$2"
+    adb -s $DEVICE shell pm clear $ITEM
+    return $?
+}
+
+function wipeApp() {
+    DEVICE="$1"
+    ITEM="$2"
+    adb -s $DEVICE uninstall $ITEM
+    return $?
+}
+
+echo -n "] Detecting devices..."
+DEVICES=$(adb devices|grep -v List|awk '{ print $1 }'|xargs)
+COUNT=$(echo $DEVICES|wc -w|tr -d " ")
+echo "$COUNT devices detected."
+for DEVICE in $(echo $DEVICES)
+    do
+        echo
+        echo -n "]-> Fetching items on $DEVICE..."
+        ITEMS=$(adb -s $DEVICE shell pm list packages | grep $PACKAGE | cut -d ':' -f 2 | tr -d "\r" | xargs)
+        COUNT=$(echo $ITEMS|wc -w|tr -d " ")
+        echo "$COUNT items found."
+        for ITEM in $(echo $ITEMS)
+            do
+                echo -n "]--> $(getActionText) $ITEM on $DEVICE..."     
+                handleAction $DEVICE $ITEM 
+            done
+        echo "]-> $DEVICE is clean"
+    done
+echo
+echo "] Data wipe complete."
