@@ -1,0 +1,21 @@
+#!/usr/bin/env python
+
+from sys import argv
+from sys import exit
+
+def calc(oldH, oldW, newW):
+    print (float(float(oldH) / float(oldW) * float(newW)))
+
+
+if __name__=="__main__":
+    argc = len(argv)
+
+    if argc != 4:
+        print("Usage: %s <old height> <old width> <new width>" % argv[0])
+        exit(1)
+
+oldH = float(argv[1])
+oldW = float(argv[2])
+newW = float(argv[3])
+
+calc(oldH, oldW, newW)

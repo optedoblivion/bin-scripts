@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then 
+    echo
+    echo "Usage: $0 <gif image name>"
+    echo
+    exit 1
+fi
+
+FILE="$1"
+
+convert +adjoin -coalesce "$FILE" frame%02d.png
