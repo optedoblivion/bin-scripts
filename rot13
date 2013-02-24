@@ -1,0 +1,21 @@
+#!/usr/bin/env python2
+
+import sys
+import string #fixed typo was using
+
+
+def rot13(str):
+
+    rot13 = string.maketrans( 
+        "ABCDEFGHIJKLMabcdefghijklmNOPQRSTUVWXYZnopqrstuvwxyz", 
+        "NOPQRSTUVWXYZnopqrstuvwxyzABCDEFGHIJKLMabcdefghijklm")
+
+    str = string.translate(str, rot13)
+    return str
+
+if __name__=="__main__":
+    argc = len(sys.argv)
+    if argc != 2:
+        print("Usage: %s <string>" % sys.argv[0])
+        sys.exit(1)
+    print(rot13(sys.argv[1])) 
