@@ -1,0 +1,59 @@
+#!/usr/bin/env python2
+
+import urllib2
+import re
+import os
+import time
+import sys
+from sys import stdout
+
+## URL
+URL = "https://play.google.com/store/apps/details?id=%s"
+
+## Regex pattern
+p = re.compile("<dd\ itemprop=\"softwareVersion\">(.*?)</dd>")
+
+ALERT_TEXT = "%s is live mother fuckers!"
+
+## Sleep time (seconds)
+SLEEP_TIME = 1 * 60
+
+def show(text):
+    """
+        Write out text
+
+        @param text text to write
+        @type text String
+    """
+    stdout.write(text) 
+
+def check(checkVersion):
+    conn = urllib2.urlopen(URL)
+    HTML = conn.read();
+    conn.close()
+
+    m = re.findall(p, HTML)
+
+    if len(m) > 0:
+        version = m[0]
+        show ("Found %s!\n" % version)
+        if version == checkVersion:
+            return True
+    return False
+
+if __name__=="__main__":
+    argc = len(sys.argv)
+    if argc != 3:
+        print("\nUsage: %s <package-name> <version>\n\n" % sys.argv[0])
+        sys.exit(1)
+    package_name = sys.argv[1]
+    checkversion = sys.argv[2]
+    URL = URL % package_name
+    ALERT_TEXT = ALERT_TEXT % package_name
+    while True:
+        show("Checking for %s..." % checkversion)
+        found = check(checkversion)
+        if found:
+            os.popen("notify-send \"%s\"" % ALERT_TEXT)
+            break
+        time.sleep(SLEEP_TIME)

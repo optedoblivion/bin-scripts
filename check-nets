@@ -1,0 +1,14 @@
+#!/bin/bash
+
+echo -n "Waiting for network connection..."
+while true;
+do
+    ping -c 1 google.com 1>/dev/null 2>/dev/null
+    if [ $? -eq 0 ]; then
+        echo "Ready!"
+        exit
+    else
+        echo -n "."
+    fi
+    sleep 2
+done

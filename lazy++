@@ -1,0 +1,154 @@
+#!/bin/bash
+
+## For colored ant output
+export ANT_ARGS='-logger org.apache.tools.ant.listener.AnsiColorLogger'
+
+### Setup logger defaults
+#if [ ! -f .logger-colors ]; then
+#    touch .logger-colors
+#    echo "AnsiColorLogger.ERROR_COLOR=2;31" > .logger-colors
+#    echo "AnsiColorLogger.WARNING_COLOR=2;35" >> .logger-colors
+#    echo "AnsiColorLogger.INFO_COLOR=2;36" >> .logger-colors
+#    echo "AnsiColorLogger.VERBOSE_COLOR=2;32" >> .logger-colors
+#    echo "AnsiColorLogger.DEBUG_COLOR=2;34" >> .logger-colors
+#fi
+#
+#export ANT_OPTS='-Dant.logger.defaults=.logger-colors'
+
+## Platform check
+platform='unknown'
+unamestr=`uname`
+if [[ "$unamestr" == 'Linux' ]]; then
+        platform='linux'
+elif [[ "$unamestr" == 'OSX' ]]; then
+        platform='osx'
+elif [[ "$unamestr" == 'Darwin' ]]; then
+        platform='osx'
+fi
+
+
+## Show help usage
+function show_usage() {
+    echo
+    echo "Usage: $0 [-h|c|p|pd|s|a]"
+    echo
+    exit
+}
+
+## Parse the arguments
+function parse_args() {
+    if [ $# -gt 0 ]; then
+        for WORD in "$@"; do
+            case $WORD in 
+                -*) true;
+                    case $WORD in
+                        "-h"|"--help") show_usage;;
+                        "-c"|"--clean") clean_workspace;;
+                        "-p"|"--production") echo;;
+                        "-pd"|"--production-debug") echo;;
+                        "-s"|"--staging") echo;;
+                        "-q"|"--qa") echo;;
+                        "-a"|"--all") echo;;
+                    esac
+                ;;
+            esac
+        done
+    fi
+}
+
+## Clean the workspace
+function clean_workspace() {
+    notify "Cleaning workspace"
+    ant clean
+    if [ $? != 0 ]; then
+        notify "Clean failed"
+        exit 1
+    fi
+    notify "Clean successful"
+}
+
+## Build production
+function buildproduction() {
+    buildapp production
+}
+
+## Build production
+function buildproductiondebug() {
+    buildapp production-debug
+}
+
+## Build staging
+function buildstaging() {
+    buildapp staging
+}
+
+## Build QA
+function buildqa {
+    buildapp qa
+}
+
+## Build the project
+function buildapp() {
+    notify "Starting build"
+    TARGET="debug"
+    if [ $# -gt 0 ]; then
+        TARGET="$1"
+    fi
+    ant $TARGET
+    if [ $? != 0 ]; then
+        notify "Build failed"
+        exit 1
+    fi
+    # Notify completed
+    notify "Build successful"
+}
+
+## Check for devices
+function check_devices() {
+    # Check for devices
+    DEVICES=$(adb devices|grep -v List|awk '{ print $1 }'|xargs)
+    COUNT=$(echo $DEVICES|wc -w|tr -d " ")
+    if [ $COUNT == 0 ]; then
+        notify "No devices detected, please connect a device"
+        adb wait-for-device
+        notify "Device detected"
+    fi
+}
+
+## Install appliction
+function installapp() {
+    notify "Installing to device"
+    ## Install to device
+    ant installd;
+    if [ $? != 0 ]; then
+        notify "Installation failed"
+        exit 1
+    fi
+    notify "Installation successful"
+}
+
+## Run the app
+function startapp() {
+    ## Parse AndroidManifest.xml to grab package name and activity class name that contains LAUNCHER category in intent-filter
+    PACKAGE_NAME=`xmllint --xpath "string(/manifest/@package)" AndroidManifest.xml`
+    MAINACTIVITY=`echo -e 'setns android=http://schemas.android.com/apk/res/android\ncat //manifest/application/activity[intent-filter/category/@android:name="android.intent.category.LAUNCHER"]/@android:name' | xmllint --shell AndroidManifest.xml | awk -F'"' '{ print $2 }' | tr -d '\n'`
+
+    # Start application
+    adb shell am start -n $PACKAGE_NAME/$MAINACTIVITY 
+    notify "Starting application"
+}
+
+## Notification function
+function notify() {
+    if [[ $platform == 'osx' ]]; then
+        terminal-notifier -title Lazy++ -subtitle Tout -group 1001 -activate com.apple.Terminal -message "$@"
+    else
+        notify-send "Lazy++" "$@" 
+    fi
+}
+
+parse_args $@
+buildapp
+installapp
+startapp
+

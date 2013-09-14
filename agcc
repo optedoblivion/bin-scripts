@@ -35,8 +35,8 @@ use strict;
 my $GCC = `which arm-eabi-gcc`;
 $GCC = qx(cd `dirname $GCC`; /bin/pwd);
 chomp $GCC;
-die "bad arm-eabi-gcc path" if $GCC !~ /(.*)\/prebuilt\//;
-my $DROID = $1;
+#die "bad arm-eabi-gcc path" if $GCC !~ /(.*)\/prebuilt\//;
+my $DROID = "/home/martin/workspace/AOSP";
 
 my $ALIB = "$DROID/out/target/product/generic/obj/lib";
 my $TOOLCHAIN = "$DROID/prebuilt/linux-x86/toolchain/arm-eabi-4.2.1";

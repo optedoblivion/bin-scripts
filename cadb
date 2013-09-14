@@ -96,12 +96,15 @@ TAGTYPES = {
 
 retag = re.compile("^([A-Z])/([^\(]+)\(([^\)]+)\): (.*)$")
 
-# to pick up -d or -e
-adb_args = ' '.join(sys.argv[1:])
+# Get possible tag filter
+adb_args = ""
+if (len(sys.argv) == 2):
+    tag = sys.argv[1]
+    adb_args = "-s %s" % tag
 
 # if someone is piping in to us, use stdin as input.  if not, invoke adb logcat
 if os.isatty(sys.stdin.fileno()):
-    input = os.popen("adb %s logcat" % adb_args)
+    input = os.popen("adb logcat %s" % adb_args)
 else:
     input = sys.stdin
 

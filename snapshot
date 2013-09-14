@@ -1,2 +1,3 @@
 #!/bin/bash
-mplayer tv:// -tv driver=v4l:device=/dev/video0:width=320:height=240:outfmt=rgb24 -frames 1 -vo jpeg
+#mplayer tv:// -tv driver=v4l:device=/dev/video0:width=320:height=240:outfmt=rgb24 -frames 1 -vo jpeg
+mplayer -vo png -frames 1 tv://

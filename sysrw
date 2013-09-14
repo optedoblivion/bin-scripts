@@ -9,4 +9,5 @@ fi
 SYSTEM=$(adb shell mount | grep system)
 DEV=$(echo $SYSTEM|awk '{ print $1 }')
 MNT=$(echo $SYSTEM|awk '{ print $3 }')
-adb shell mount -o remount,rw $DEV $MNT
+echo adb shell mount -o remount,rw $DEV $MNT
+

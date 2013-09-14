@@ -1,0 +1,99 @@
+#!/bin/bash
+REQUIRED="sudo iwconfig wpa_supplicant dhcpcd ifstat"
+
+## Check for all packages
+for name in $(echo $REQUIRED);
+do
+    type -P "$name" &>/dev/null || { echo "Failed to locate dependency: '$name'" >&2; exit 1;}
+done
+
+## Constants
+IFACE=""
+ESSID=""
+ENC_TYPE="$3"
+ENC_KEY="$4"
+
+## Show help
+function show_usage() {
+    echo
+    echo "Usage: $0 <interface> <essid> [wpa|wep] [key]"
+    echo
+}
+
+## Shutdown dhcpcd
+function stop_dhcpcd() {
+    DHCPCD_PID=$(ps ax | grep "dhcpcd $IFACE" | grep -v grep | awk '{ print $1 }')
+    if [ "$PID" != "" ]; then
+        sudo dhcpcd -k "$IFACE"
+        sleep 1
+    fi
+}
+
+## Ask if you want to save the profile
+function check_if_save() {
+    read -p "Would you like to save this configuration? " yn
+    echo $yn
+}
+
+## Start up the supplicant daemon
+function start_wpa_supplicant() {
+    echo "derp"
+}
+
+## Select the interface
+function select_iface() {
+
+    IFACES=$(ifstat|grep -v kernel |grep -v Interface |grep -v Pkts/Rate | grep -v Errs/Drop|awk '{ print $1 }' |grep -v lo|grep -v "^0$")
+    CNT=$(echo $IFACES|wc -w)
+    if [ $CNT == 1 ]; then
+        IFACE="$IFACES"
+    else
+        ## Select
+        echo ""
+    fi
+
+}
+
+function setup_iface() {
+    echo ""
+}
+
+function connect() {
+    ENC_TYPE="$1"
+}
+
+function parse_args() {
+    echo ""
+}
+
+## Main function
+function main() {
+    select_iface
+    stop_dhcpcd
+    parse_args
+}
+
+main
+
+sudo iwconfig "$IFACE" essid "$ESSID"
+
+if [ "$ENC_TYPE" == "wep" ]; then
+    sudo iwconfig "$IFACE" essid "$ESSID" key "$ENC_KEY"
+fi
+
+if [ "$ENC_TYPE" == "wpa" ]; then
+    WPID=$(pgrep wpa_supplicant)
+    if [ "$WPID" != "" ]; then
+        sudo kill -9 $WPID
+    fi
+    WPA_CONF="/tmp/wpa-$(echo $RANDOM)"
+    if [ "$ENC_KEY" == "" ]; then
+        read -p "Enter WPA Key: " ENC_KEY
+    fi
+    wpa_passphrase "$ESSID" "$ENC_KEY" > $WPA_CONF
+    sudo wpa_supplicant -B -Dwext -i $IFACE -c $WPA_CONF
+    sleep 3
+fi
+
+sudo dhcpcd $IFACE
+
