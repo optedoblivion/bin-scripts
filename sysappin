@@ -1,0 +1,114 @@
+#!/bin/bash
+# Martin Brabham (optedoblivion@cyngn.com)
+
+NC='\x1B[0m' #NO COLOR
+RED='\x1B[1;31m'
+GREEN='\x1B[1;32m'
+CYAN='\x1B[0;36m'
+
+
+if [ $# -lt 1 ]; then
+    echo
+    echo -e "${CYAN}System App Installer${NC}"
+    echo -e "    ${CYAN}Usage: $0 <path/to/app.apk> [-p/--private]${NC}"
+    echo
+    exit 0
+fi
+
+# Check and set apk path
+APK_PATH="$1"
+echo -en "${CYAN}Checking Path: $APK_PATH...${NC}"
+if [ -e $APK_PATH ]; then
+    echo -e "${GREEN}OK${NC}"
+else 
+    echo -e "${RED}INVALID${NC}"
+    exit 1
+fi
+
+## Cut out file.apk
+APK_NAME=$(echo ${APK_PATH##*/})
+
+# Set private argument if exists
+PRIVATE=$(echo $2 | tr '[:upper:]' '[:lower:]')
+
+# Variables for temp shell file
+TMP_FILE=".install.sh"
+SYSTEM_APP="/system/app"
+SYSTEM_PRIV_APP="/system/priv-app"
+
+# Check for device
+echo -en "${CYAN}Checking for device...${NC}"
+DEVICES=$(adb devices | grep -v "List of")
+ADDRESS=$(echo $DEVICES | awk '{ print $1}')
+if [ "$ADDRESS" == "" ]; then
+    echo -e "${RED}NOT FOUND${NC}"
+    exit 1
+else
+    echo -e "${GREEN}FOUND${NC}"
+fi
+
+# Determine install directory
+echo -en "${CYAN}Determining install directory...${NC}"
+if [ "$PRIVATE" == "-p" ] || [ "$PRIVATE" == "--private" ]; then
+    DEST=$SYSTEM_PRIV_APP
+else 
+    DEST=$SYSTEM_APP
+fi
+echo -e "${GREEN}$DEST${NC}"
+
+# Generate device install script to send to device
+echo -en "${CYAN}Generating device install script...${NC}"
+echo "mount -o remount,rw /system" > $TMP_FILE
+echo "cat /data/local/tmp/$APK_NAME > $DEST/$APK_NAME" >> $TMP_FILE
+echo "stop" >> $TMP_FILE
+echo "start" >> $TMP_FILE
+echo -e "${GREEN}DONE${NC}"
+echo -en "${CYAN}Sending install script to device...${NC}"
+adb push $TMP_FILE /data/local/tmp 2>/dev/null
+adb root
+adb remount
+if [ $? == 0 ]; then
+    echo -e "${GREEN}SUCCESS${NC}"
+else
+    echo -e "${RED}FAILED${NC}"
+    exit 1
+fi
+
+# Send file to device
+echo -en "${CYAN}Sending $APK_NAME to device...${NC}"
+adb push $APK_PATH /data/local/tmp 2>/dev/null
+if [ $? == 0 ]; then
+    echo -e "${GREEN}SUCCESS${NC}"
+else
+    echo -e "${RED}FAILED${NC}"
+    exit 1
+fi
+
+# Install application
+echo -en "${CYAN}Running install script...${NC}"
+adb shell su - root sh /data/local/tmp/$TMP_FILE  2>/dev/null
+if [ $? == 0 ]; then
+    echo -e "${GREEN}SUCCESS${NC}"
+else
+    echo -e "${RED}FAILED${NC}"
+    exit 1
+fi
+
+echo -en "${CYAN}Cleaning up...${NC}"
+adb shell rm /data/local/tmp/$APK_NAME 2>/dev/null
+if [ $? != 0 ]; then
+    echo -e "${RED}FAILED${NC}"
+    exit 1
+fi
+adb shell rm /data/local/tmp/$TMP_FILE 2>/dev/null
+if [ $? != 0 ]; then
+    echo -e "${RED}FAILED${NC}"
+    exit 1
+fi
+rm -rf $TMP_FILE
+if [ $? == 0 ]; then
+    echo -e "${GREEN}SUCCESS${NC}"
+else
+    echo -e "${RED}FAILED${NC}"
+    exit 1
+fi
