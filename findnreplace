@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ $# -ne 3 ]; then
+    echo
+    echo "Usage: $0 <find> <replace> <path>"
+    echo
+    exit 1
+fi
+
+FIND="$1"
+REPLACE="$2"
+SEARCH_PATH="$3"
+
+FILES=$(grep -R $FIND $SEARCH_PATH | awk '{ print $1 }' | cut -d ':' -f 1)
+sed "s/$FIND/$REPLACE/g" -i $FILES
